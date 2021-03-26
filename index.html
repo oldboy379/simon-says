@@ -83,7 +83,7 @@
         display: none;
       }
     </style>
-  <script async src='/cdn-cgi/bm/cv/669835187/api.js'></script></head>
+  </head>
   <body>
     <div class="gameboard">
       <div id="celeste" class="color celeste left" data-color="celeste"></div>
@@ -92,26 +92,158 @@
       <div id="verde" class="color verde right" data-color="verde"></div>
       <button id="btnEmpezar" class="btn-start" onclick="empezarJuego()">Empezar a jugar!</button>
     </div>
+
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script>
+
       const celeste = document.getElementById('celeste')
       const violeta = document.getElementById('violeta')
       const naranja = document.getElementById('naranja')
       const verde = document.getElementById('verde')
       const btnEmpezar = document.getElementById('btnEmpezar')
+      const ULTIMO_NIVEL = 10
 
       class Juego {
         constructor() {
+          this.inicializar = this.inicializar.bind(this)
           this.inicializar()
+          this.generarSecuencia()
+          setTimeout(this.siguienteNivel, 500)
         }
 
         inicializar() {
-          btnEmpezar.classList.add('hide')
+          //Ayuda a no perder el contexto del editor especial para capturar eventos.
+          this.siguienteNivel = this.siguienteNivel.bind(this)
+          this.elegirColor = this.elegirColor.bind(this)
+          this.toggleBtnEmpezar()
+          this.nivel = 1
+          this.colores = {
+            celeste, violeta, naranja, verde
+          }
+        }
+
+        toggleBtnEmpezar() {
+          if (btnEmpezar.classList.contains('hide')) {
+            btnEmpezar.classList.remove('hide')
+          } else {
+            btnEmpezar.classList.add('hide')
+          }
+        }
+
+        generarSecuencia() {
+          this.secuencia = new Array(ULTIMO_NIVEL).fill(0).map(n => Math.floor(Math.random() * 4))
+        }
+
+        siguienteNivel() {
+          this.subnivel = 0
+          this.iluminarSecuencia()
+          this.agregarEventosClick()
+        }
+
+        transformarNumeroAColor(numero) {
+          switch (numero) {
+            case 0:
+              return 'celeste'
+            case 1:
+              return 'violeta'
+            case 2: 
+              return 'naranja'
+            case 3: 
+              return 'verde'
+          }
+        }
+
+        transformarColorANumero(color) {
+          switch (color) {
+            case 'celeste':
+              return 0
+            case 'violeta':
+              return 1
+            case 'naranja': 
+              return 2
+            case 'verde': 
+              return 3
+          }
+        }
+
+        iluminarSecuencia() {
+          for (let i = 0; i < this.nivel; i ++) {
+            const color = this.transformarNumeroAColor(this.secuencia[i])
+            setTimeout(() => this.iluminarColor(color), 1000 * i)
+          }
+        }
+
+        iluminarColor(color) {
+          this.colores[color].classList.add('light')
+          setTimeout(() => this.apagarColor(color), 350)
+        }
+
+        apagarColor(color) {
+          this.colores[color].classList.remove('light')
+        }
+
+        agregarEventosClick() {
+          this.colores.celeste.addEventListener('click', this.elegirColor)
+          this.colores.verde.addEventListener('click', this.elegirColor)
+          this.colores.violeta.addEventListener('click', this.elegirColor)
+          this.colores.naranja.addEventListener('click', this.elegirColor)
+        }
+
+        eliminarEventosClick () {
+          this.colores.celeste.removeEventListener('click', this.elegirColor)
+          this.colores.verde.removeEventListener('click', this.elegirColor)
+          this.colores.violeta.removeEventListener('click', this.elegirColor)
+          this.colores.naranja.removeEventListener('click', this.elegirColor)
+        }
+
+        elegirColor(ev) {
+          const nombreColor = ev.target.dataset.color
+          const numeroColor = this.transformarColorANumero(nombreColor)
+          this.iluminarColor(nombreColor)
+          if (numeroColor === this.secuencia[this.subnivel]) {
+            this.subnivel++
+            if(this.subnivel === this.nivel) {
+              this.nivel++
+              this.eliminarEventosClick()
+              if(this.nivel === (ULTIMO_NIVEL + 1)) {
+                this.ganoElJuego()
+              } else {
+                setTimeout(this.siguienteNivel, 1500)
+              }
+            }
+          } else {
+            this.perdioElJuego()
+          }
+        }
+
+        ganoElJuego() {
+            Swal.fire({
+            icon: 'success',
+            title: 'Platzi',
+            text: 'Felicitaciones, ganaste el juego!!'
+          })
+            .then(() => {
+              this.eliminarEventosClick()
+              this.inicializar()
+            })
+        }
+
+        perdioElJuego() {
+          Swal.fire({
+            icon: 'error',
+            title: 'Platzi',
+            text: 'Lo lamentamos, perdiste 😢'
+          })
+            .then(() => {
+              this.eliminarEventosClick()
+              this.inicializar()
+            })
         }
       }
 
       function empezarJuego() {
-        var juego = new Juego()
+        window.juego =  new Juego()
       }
     </script>
-  <script type="text/javascript">(function(){window['__CF$cv$params']={r:'62ff29f9da93127f',m:'bdfbbb65e2b4a84fe937e9417e2e8db8ad06f569-1615742335-1800-AXHwrsbnZa3gu8CqhwIczHf10EB87IAbSaBZ8sJScW8sLBtjn3q0LaYJGOhCjz4GVxU6ymUNbJ2SJPMfutngd1dJAqnmWBZ6DoTKlcNqWt1AHKMllK6yDscPr/9RiJe2xd6Kn5VXOXQ2Bgrnbcn0t9iT4cAArASA+jT+JhpHyb6KkUG9bVtX5gTMfdju1HxabsQBw8Y3TB7Iw+zvKEn0GkvMzItFclhdYnzsp6PGb57buqBB0FMdmxAW5POnD7EWsnmhJ2z9KLzz+GECPczi4jxiDM5fTX0xzz0YIsR17POQ/eSvZzIK17BFsvHcy5vd6A==',s:[0x50aeadc4d7,0x3786967cbc],}})();</script></body>
+  </body>
 </html>
