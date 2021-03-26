@@ -96,6 +96,7 @@
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script>
 
+      //Constantes básicas del juego (id botones)
       const celeste = document.getElementById('celeste')
       const violeta = document.getElementById('violeta')
       const naranja = document.getElementById('naranja')
@@ -111,6 +112,7 @@
           setTimeout(this.siguienteNivel, 500)
         }
 
+        //Funcion inicial del juego
         inicializar() {
           //Ayuda a no perder el contexto del editor especial para capturar eventos.
           this.siguienteNivel = this.siguienteNivel.bind(this)
@@ -122,6 +124,7 @@
           }
         }
 
+        //Controlador del boton iniacial
         toggleBtnEmpezar() {
           if (btnEmpezar.classList.contains('hide')) {
             btnEmpezar.classList.remove('hide')
@@ -130,16 +133,19 @@
           }
         }
 
+        //Secuencia random que se genera para para el juego
         generarSecuencia() {
           this.secuencia = new Array(ULTIMO_NIVEL).fill(0).map(n => Math.floor(Math.random() * 4))
         }
 
+        //Avance de nivel
         siguienteNivel() {
           this.subnivel = 0
           this.iluminarSecuencia()
           this.agregarEventosClick()
         }
 
+        //Transforma un numero a un color
         transformarNumeroAColor(numero) {
           switch (numero) {
             case 0:
@@ -153,6 +159,7 @@
           }
         }
 
+        //Transforma un color a un numero
         transformarColorANumero(color) {
           switch (color) {
             case 'celeste':
@@ -166,6 +173,7 @@
           }
         }
 
+        //Logica para ilumninar la secuancia
         iluminarSecuencia() {
           for (let i = 0; i < this.nivel; i ++) {
             const color = this.transformarNumeroAColor(this.secuencia[i])
@@ -173,15 +181,18 @@
           }
         }
 
+        //Agrega clase a Css para iluminar un color
         iluminarColor(color) {
           this.colores[color].classList.add('light')
           setTimeout(() => this.apagarColor(color), 350)
         }
 
+        //Eliminia clase a Css para apagar color
         apagarColor(color) {
           this.colores[color].classList.remove('light')
         }
 
+        //Añade los eventos del mouse click
         agregarEventosClick() {
           this.colores.celeste.addEventListener('click', this.elegirColor)
           this.colores.verde.addEventListener('click', this.elegirColor)
@@ -189,6 +200,7 @@
           this.colores.naranja.addEventListener('click', this.elegirColor)
         }
 
+        //Elimina los eventos del mouse click
         eliminarEventosClick () {
           this.colores.celeste.removeEventListener('click', this.elegirColor)
           this.colores.verde.removeEventListener('click', this.elegirColor)
@@ -196,6 +208,7 @@
           this.colores.naranja.removeEventListener('click', this.elegirColor)
         }
 
+        //Controlador de los eventos del juego
         elegirColor(ev) {
           const nombreColor = ev.target.dataset.color
           const numeroColor = this.transformarColorANumero(nombreColor)
@@ -216,6 +229,7 @@
           }
         }
 
+        //Pestaña de juego ganado
         ganoElJuego() {
             Swal.fire({
             icon: 'success',
@@ -228,6 +242,7 @@
             })
         }
 
+        //Pestaña de juego perdido
         perdioElJuego() {
           Swal.fire({
             icon: 'error',
@@ -242,6 +257,7 @@
       }
 
       function empezarJuego() {
+        //Se añade Wiwndos para controlar con mayor facilidad en consola
         window.juego =  new Juego()
       }
     </script>
